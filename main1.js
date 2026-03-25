@@ -428,16 +428,25 @@
     var newDirs = { up: false, down: false, left: false, right: false };
 
     if (norm > this.deadzone) {
-      var absDx = Math.abs(dx);
-      var absDy = Math.abs(dy);
-
       if (state.directionMode === '8way') {
-        var threshold = d * 0.38;
-        if (dy < -threshold) newDirs.up = true;
-        if (dy > threshold) newDirs.down = true;
-        if (dx < -threshold) newDirs.left = true;
-        if (dx > threshold) newDirs.right = true;
+        var nx = dx / d;
+        var ny = dy / d;
+        if (ny < -0.38) newDirs.up = true;
+        if (ny > 0.38) newDirs.down = true;
+        if (nx < -0.38) newDirs.left = true;
+        if (nx > 0.38) newDirs.right = true;
+        if (!newDirs.up && !newDirs.down && !newDirs.left && !newDirs.right) {
+          if (Math.abs(nx) > Math.abs(ny)) {
+            if (nx > 0) newDirs.right = true;
+            else newDirs.left = true;
+          } else {
+            if (ny < 0) newDirs.up = true;
+            else newDirs.down = true;
+          }
+        }
       } else {
+        var absDx = Math.abs(dx);
+        var absDy = Math.abs(dy);
         if (absDx > absDy) {
           if (dx > 0) newDirs.right = true;
           else newDirs.left = true;
