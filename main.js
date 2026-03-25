@@ -4,7 +4,7 @@
   if (typeof window === 'undefined') return;
 
   var TOUCH = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-  var MOBILE = /Android|iPhone|iPad|iPod|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  var MOBILE = /Android|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
   if (!TOUCH && !MOBILE) return;
 
   var PREFIX = 'mgp_';
@@ -27,7 +27,7 @@
     directionMode: '4way',
     actionButtons: true,
     actionBindA: 'Space',
-    actionBindB: 'KeyE',
+    actionBindB: 'KeyX',
     actionBindX: 'ShiftLeft',
     actionBindY: 'KeyZ',
     cursorMode: false,
@@ -200,21 +200,21 @@
     '.mgp-gear svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
     '.mgp-panel-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:99991}',
     '.mgp-panel-backdrop.mgp-visible{opacity:1;pointer-events:auto}',
-    '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:70vh;background:rgba(20,22,28,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:99992;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,20px) 0}',
+    '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:70vh;background:rgba(20,22,28,0.96);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:99992;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,20px) 0;touch-action:pan-y}',
     '.mgp-panel.mgp-visible{transform:translateY(0)}',
     '.mgp-panel-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);margin:10px auto 0}',
     '.mgp-panel-title{font-size:15px;font-weight:700;color:rgba(255,255,255,0.9);padding:16px 20px 8px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:-0.2px}',
     '.mgp-section{padding:6px 20px 10px}',
     '.mgp-section-label{font-size:10px;font-weight:700;color:rgba(255,255,255,0.35);text-transform:uppercase;letter-spacing:1.2px;padding:10px 0 6px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}',
-    '.mgp-row{display:flex;align-items:center;justify-content:space-between;padding:10px 0;min-height:40px;border-bottom:1px solid rgba(255,255,255,0.05)}',
+    '.mgp-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;min-height:48px;border-bottom:1px solid rgba(255,255,255,0.05)}',
     '.mgp-row:last-child{border-bottom:none}',
     '.mgp-row-label{font-size:13px;color:rgba(255,255,255,0.75);font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;font-weight:500}',
-    '.mgp-toggle{position:relative;width:44px;height:26px;border-radius:13px;background:rgba(255,255,255,0.12);border:none;padding:0;cursor:pointer;transition:background 0.2s;flex-shrink:0}',
+    '.mgp-toggle{position:relative;width:50px;height:30px;border-radius:15px;background:rgba(255,255,255,0.12);border:none;padding:0;cursor:pointer;transition:background 0.2s;flex-shrink:0;touch-action:manipulation}',
     '.mgp-toggle.mgp-on{background:rgba(52,120,246,0.85)}',
-    '.mgp-toggle-thumb{position:absolute;top:3px;left:3px;width:20px;height:20px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.25);transition:left 0.2s}',
-    '.mgp-toggle.mgp-on .mgp-toggle-thumb{left:21px}',
+    '.mgp-toggle-thumb{position:absolute;top:3px;left:3px;width:24px;height:24px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.25);transition:left 0.2s}',
+    '.mgp-toggle.mgp-on .mgp-toggle-thumb{left:23px}',
     '.mgp-seg{display:flex;background:rgba(255,255,255,0.06);border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,0.08)}',
-    '.mgp-seg-btn{flex:1;padding:7px 10px;font-size:11px;font-weight:600;color:rgba(255,255,255,0.45);text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:transparent;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;letter-spacing:0.3px}',
+    '.mgp-seg-btn{flex:1;padding:12px 14px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:transparent;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;letter-spacing:0.3px;touch-action:manipulation}',
     '.mgp-seg-btn.mgp-active{background:rgba(52,120,246,0.75);color:rgba(255,255,255,0.95)}',
     '.mgp-slider-wrap{display:flex;align-items:center;gap:10px;flex:1;max-width:160px}',
     '.mgp-slider{-webkit-appearance:none;appearance:none;width:100%;height:4px;border-radius:2px;background:rgba(255,255,255,0.12);outline:none}',
@@ -223,7 +223,7 @@
     '.mgp-bind-row{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.05)}',
     '.mgp-bind-row:last-child{border-bottom:none}',
     '.mgp-bind-label{font-size:12px;color:rgba(255,255,255,0.5);width:24px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}',
-    '.mgp-bind-btn{flex:1;padding:8px 12px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:12px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s,border-color 0.15s}',
+    '.mgp-bind-btn{flex:1;padding:10px 12px;border-radius:8px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:13px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s,border-color 0.15s;touch-action:manipulation}',
     '.mgp-bind-btn:active{background:rgba(52,120,246,0.15);border-color:rgba(52,120,246,0.3)}',
     '.mgp-cursor-dot{position:fixed;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.08);pointer-events:none;z-index:99989;transition:opacity 0.15s;box-shadow:0 0 8px rgba(0,0,0,0.3)}',
     '.mgp-cursor-dot.mgp-dragging{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.7)}',
@@ -236,7 +236,7 @@
     '.mgp-overlay{animation:mgp-fadein 0.3s ease}',
     '@supports(padding:env(safe-area-inset-bottom)){.mgp-joystick-zone{bottom:calc(12px + env(safe-area-inset-bottom))}.mgp-dpad-zone{bottom:calc(12px + env(safe-area-inset-bottom))}.mgp-actions{bottom:calc(16px + env(safe-area-inset-bottom))}}',
     '@media(orientation:landscape){.mgp-joystick-zone{bottom:8px;left:8px}.mgp-dpad-zone{bottom:8px;left:8px}.mgp-actions{bottom:12px;right:12px}}',
-    '.mgp-reset-btn{display:block;width:100%;padding:12px;margin-top:8px;border-radius:10px;background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.2);color:rgba(255,100,100,0.85);font-size:13px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s}',
+    '.mgp-reset-btn{display:block;width:100%;padding:14px;margin-top:8px;border-radius:10px;background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.2);color:rgba(255,100,100,0.85);font-size:13px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s;touch-action:manipulation}',
     '.mgp-reset-btn:active{background:rgba(255,60,60,0.25)}',
     '.mgp-divider{height:1px;background:rgba(255,255,255,0.06);margin:8px 0}'
   ].join('\n');
@@ -428,7 +428,7 @@
     var newDirs = { up: false, down: false, left: false, right: false };
 
     if (norm > this.deadzone) {
-      var a = angle(0, 0, dx, -dy);
+      var a = angle(0, 0, dx, dy);
       var deg = a * 180 / Math.PI;
       if (deg < 0) deg += 360;
 
@@ -1004,18 +1004,16 @@
     this.els.segDpad = btnDpad;
 
     var self = this;
-    btnJoy.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    btnJoy.addEventListener('click', function() {
       state.inputMode = 'joystick';
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
-    btnDpad.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    });
+    btnDpad.addEventListener('click', function() {
       state.inputMode = 'dpad';
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
+    });
   };
 
   SettingsPanel.prototype.buildJoystickSection = function() {
@@ -1037,18 +1035,16 @@
     this.els.segFloat = btnFloat;
 
     var self = this;
-    btnFixed.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    btnFixed.addEventListener('click', function() {
       state.joystickType = 'fixed';
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
-    btnFloat.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    });
+    btnFloat.addEventListener('click', function() {
       state.joystickType = 'floating';
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
+    });
 
     var row2 = el('div', 'mgp-row', section);
     var lbl2 = el('div', 'mgp-row-label', row2);
@@ -1061,18 +1057,16 @@
     this.els.seg4way = btn4;
     this.els.seg8way = btn8;
 
-    btn4.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    btn4.addEventListener('click', function() {
       state.directionMode = '4way';
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
-    btn8.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    });
+    btn8.addEventListener('click', function() {
       state.directionMode = '8way';
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
+    });
   };
 
   SettingsPanel.prototype.buildActionSection = function() {
@@ -1086,13 +1080,12 @@
     this.els.toggleActions = this.createToggle(toggleRow, state.actionButtons);
 
     var self = this;
-    this.els.toggleActions.el.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    this.els.toggleActions.el.addEventListener('click', function() {
       state.actionButtons = !state.actionButtons;
       self.updateToggle(self.els.toggleActions, state.actionButtons);
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
+    });
 
     this.els.bindContainer = el('div', '', section);
     var binds = [
@@ -1112,10 +1105,9 @@
         btn.dataset.stateKey = bind.stateKey;
         self.els['bind_' + bind.id] = btn;
 
-        btn.addEventListener('touchstart', function(e) {
-          e.preventDefault();
+        btn.addEventListener('click', function() {
           self.cycleBinding(bind.stateKey, btn);
-        }, { passive: false });
+        });
       })(binds[i]);
     }
   };
@@ -1141,48 +1133,44 @@
     var lbl1 = el('div', 'mgp-row-label', row1);
     lbl1.textContent = 'Cursor Mode';
     this.els.toggleCursor = this.createToggle(row1, state.cursorMode);
-    this.els.toggleCursor.el.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    this.els.toggleCursor.el.addEventListener('click', function() {
       state.cursorMode = !state.cursorMode;
       self.updateToggle(self.els.toggleCursor, state.cursorMode);
       self.syncUI();
       self.emitChange();
-    }, { passive: false });
+    });
 
     var row2 = el('div', 'mgp-row', section);
     this.els.doubleTapRow = row2;
     var lbl2 = el('div', 'mgp-row-label', row2);
     lbl2.textContent = 'Double-Tap Drag';
     this.els.toggleDoubleTap = this.createToggle(row2, state.doubleTapDrag);
-    this.els.toggleDoubleTap.el.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    this.els.toggleDoubleTap.el.addEventListener('click', function() {
       state.doubleTapDrag = !state.doubleTapDrag;
       self.updateToggle(self.els.toggleDoubleTap, state.doubleTapDrag);
       self.emitChange();
-    }, { passive: false });
+    });
 
     var row3 = el('div', 'mgp-row', section);
     var lbl3 = el('div', 'mgp-row-label', row3);
     lbl3.textContent = 'Virtual Keyboard';
     this.els.toggleKeyboard = this.createToggle(row3, state.virtualKeyboard);
-    this.els.toggleKeyboard.el.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    this.els.toggleKeyboard.el.addEventListener('click', function() {
       state.virtualKeyboard = !state.virtualKeyboard;
       self.updateToggle(self.els.toggleKeyboard, state.virtualKeyboard);
       self.emitChange();
-    }, { passive: false });
+    });
 
     var row4 = el('div', 'mgp-row', section);
     var lbl4 = el('div', 'mgp-row-label', row4);
     lbl4.textContent = 'Haptic Feedback';
     this.els.toggleHaptic = this.createToggle(row4, state.hapticFeedback);
-    this.els.toggleHaptic.el.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    this.els.toggleHaptic.el.addEventListener('click', function() {
       state.hapticFeedback = !state.hapticFeedback;
       self.updateToggle(self.els.toggleHaptic, state.hapticFeedback);
       self.emitChange();
       haptic(15);
-    }, { passive: false });
+    });
   };
 
   SettingsPanel.prototype.buildAppearanceSection = function() {
@@ -1244,8 +1232,7 @@
     this.els.resetBtn = resetBtn;
 
     var self = this;
-    resetBtn.addEventListener('touchstart', function(e) {
-      e.preventDefault();
+    resetBtn.addEventListener('click', function() {
       if (self.resetConfirm) {
         for (var k in defaults) { state[k] = defaults[k]; }
         self.syncUI();
@@ -1262,7 +1249,7 @@
           resetBtn.textContent = 'Reset to Defaults';
         }, 3000);
       }
-    }, { passive: false });
+    });
 
     var v = el('div', 'mgp-version', this.panel);
     v.textContent = 'MobileGamepad v' + VERSION;
