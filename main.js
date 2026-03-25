@@ -30,12 +30,12 @@
     actionBindB: 'KeyX',
     actionBindX: 'ShiftLeft',
     actionBindY: 'KeyZ',
-    cursorMode: false,
-    doubleTapDrag: false,
+    cursorMode: true,
+    doubleTapDrag: true,
     virtualKeyboard: false,
     hapticFeedback: true,
-    opacity: 0.45,
-    controlSize: 1.0,
+    opacity: 0.80,
+    controlSize: 1.1,
     showControls: true
   };
 
