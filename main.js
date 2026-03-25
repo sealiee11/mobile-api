@@ -34,7 +34,7 @@
     doubleTapDrag: false,
     virtualKeyboard: false,
     hapticFeedback: true,
-    opacity: 0.85,
+    opacity: 0.45,
     controlSize: 1.0,
     showControls: true
   };
@@ -1476,8 +1476,6 @@
       kbdBtn.style.bottom = '16px';
       kbdBtn.style.right = '60px';
     }
-
-    releaseAllKeys();
   };
 
   MobileGamepad.prototype.bindGlobalEvents = function() {
