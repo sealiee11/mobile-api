@@ -34,7 +34,7 @@
     doubleTapDrag: false,
     virtualKeyboard: false,
     hapticFeedback: true,
-    opacity: 0.45,
+    opacity: 0.85,
     controlSize: 1.0,
     showControls: true
   };
@@ -966,10 +966,10 @@
     this.gear = el('div', 'mgp-gear mgp-ctrl', this.overlay);
     this.gear.innerHTML = ICONS.gear;
 
-    this.backdrop = el('div', 'mgp-panel-backdrop mgp-ctrl');
+    this.backdrop = el('div', 'mgp-panel-backdrop');
     document.body.appendChild(this.backdrop);
 
-    this.panel = el('div', 'mgp-panel mgp-ctrl');
+    this.panel = el('div', 'mgp-panel');
     document.body.appendChild(this.panel);
 
     var handle = el('div', 'mgp-panel-handle', this.panel);
@@ -994,9 +994,9 @@
     var row = el('div', 'mgp-row', section);
     var seg = el('div', 'mgp-seg', row);
 
-    var btnJoy = el('button', 'mgp-seg-btn mgp-ctrl', seg);
+    var btnJoy = el('button', 'mgp-seg-btn', seg);
     btnJoy.textContent = 'Joystick';
-    var btnDpad = el('button', 'mgp-seg-btn mgp-ctrl', seg);
+    var btnDpad = el('button', 'mgp-seg-btn', seg);
     btnDpad.textContent = 'D-Pad';
 
     this.els.segJoystick = btnJoy;
@@ -1026,9 +1026,9 @@
     var lbl1 = el('div', 'mgp-row-label', row1);
     lbl1.textContent = 'Position';
     var seg1 = el('div', 'mgp-seg', row1);
-    var btnFixed = el('button', 'mgp-seg-btn mgp-ctrl', seg1);
+    var btnFixed = el('button', 'mgp-seg-btn', seg1);
     btnFixed.textContent = 'Fixed';
-    var btnFloat = el('button', 'mgp-seg-btn mgp-ctrl', seg1);
+    var btnFloat = el('button', 'mgp-seg-btn', seg1);
     btnFloat.textContent = 'Float';
     this.els.segFixed = btnFixed;
     this.els.segFloat = btnFloat;
@@ -1049,9 +1049,9 @@
     var lbl2 = el('div', 'mgp-row-label', row2);
     lbl2.textContent = 'Directions';
     var seg2 = el('div', 'mgp-seg', row2);
-    var btn4 = el('button', 'mgp-seg-btn mgp-ctrl', seg2);
+    var btn4 = el('button', 'mgp-seg-btn', seg2);
     btn4.textContent = '4-Way';
-    var btn8 = el('button', 'mgp-seg-btn mgp-ctrl', seg2);
+    var btn8 = el('button', 'mgp-seg-btn', seg2);
     btn8.textContent = '8-Way';
     this.els.seg4way = btn4;
     this.els.seg8way = btn8;
@@ -1099,7 +1099,7 @@
         var row = el('div', 'mgp-bind-row', self.els.bindContainer);
         var lbl = el('div', 'mgp-bind-label', row);
         lbl.textContent = bind.label;
-        var btn = el('div', 'mgp-bind-btn mgp-ctrl', row);
+        var btn = el('div', 'mgp-bind-btn', row);
         btn.textContent = keyLabel(state[bind.stateKey]);
         btn.dataset.stateKey = bind.stateKey;
         self.els['bind_' + bind.id] = btn;
@@ -1226,7 +1226,7 @@
     var section = el('div', 'mgp-section', this.panel);
     var divider = el('div', 'mgp-divider', section);
 
-    var resetBtn = el('button', 'mgp-reset-btn mgp-ctrl', section);
+    var resetBtn = el('button', 'mgp-reset-btn', section);
     resetBtn.textContent = 'Reset to Defaults';
     this.els.resetBtn = resetBtn;
 
