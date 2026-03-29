@@ -8,7 +8,7 @@
   if (!TOUCH && !MOBILE) return;
 
   var PREFIX = 'mgp_';
-  var VERSION = '1.0.0';
+  var VERSION = '1.1.0';
 
   function store(key, val) {
     try { localStorage.setItem(PREFIX + key, JSON.stringify(val)); } catch(e) {}
@@ -21,10 +21,53 @@
     } catch(e) { return fallback; }
   }
 
+  var MOVEMENT_SCHEMES = {
+    arrows: {
+      label: 'Arrows',
+      up: 'ArrowUp',
+      down: 'ArrowDown',
+      left: 'ArrowLeft',
+      right: 'ArrowRight'
+    },
+    wasd: {
+      label: 'WASD',
+      up: 'KeyW',
+      down: 'KeyS',
+      left: 'KeyA',
+      right: 'KeyD'
+    },
+    zqsd: {
+      label: 'ZQSD',
+      up: 'KeyZ',
+      down: 'KeyS',
+      left: 'KeyQ',
+      right: 'KeyD'
+    },
+    ijkl: {
+      label: 'IJKL',
+      up: 'KeyI',
+      down: 'KeyK',
+      left: 'KeyJ',
+      right: 'KeyL'
+    },
+    custom: {
+      label: 'Custom',
+      up: 'ArrowUp',
+      down: 'ArrowDown',
+      left: 'ArrowLeft',
+      right: 'ArrowRight'
+    }
+  };
+
   var defaults = {
     inputMode: 'joystick',
     joystickType: 'fixed',
     directionMode: '4way',
+    movementScheme: 'arrows',
+    customMoveUp: 'ArrowUp',
+    customMoveDown: 'ArrowDown',
+    customMoveLeft: 'ArrowLeft',
+    customMoveRight: 'ArrowRight',
     actionButtons: true,
     actionBindA: 'Space',
     actionBindB: 'KeyX',
@@ -46,6 +89,25 @@
 
   function saveState() {
     Object.keys(state).forEach(function(k) { store(k, state[k]); });
+  }
+
+  function getMovementKeys() {
+    if (state.movementScheme === 'custom') {
+      return {
+        up: state.customMoveUp,
+        down: state.customMoveDown,
+        left: state.customMoveLeft,
+        right: state.customMoveRight
+      };
+    }
+    var scheme = MOVEMENT_SCHEMES[state.movementScheme];
+    if (!scheme) scheme = MOVEMENT_SCHEMES.arrows;
+    return {
+      up: scheme.up,
+      down: scheme.down,
+      left: scheme.left,
+      right: scheme.right
+    };
   }
 
   var KEY_DB = {
@@ -84,6 +146,7 @@
   };
 
   var BINDABLE_KEYS = [
+    'ArrowUp','ArrowDown','ArrowLeft','ArrowRight',
     'Space','Enter','ShiftLeft','ControlLeft','KeyZ','KeyX','KeyC',
     'KeyA','KeyS','KeyD','KeyW','KeyE','KeyQ','KeyR','KeyF',
     'KeyI','KeyJ','KeyK','KeyL',
@@ -95,7 +158,8 @@
     if (!code) return '?';
     var map = {
       Space:'SPC',Enter:'ENT',ShiftLeft:'SHF',ShiftRight:'SHF',
-      ControlLeft:'CTL',Tab:'TAB',Escape:'ESC',Backspace:'BKS'
+      ControlLeft:'CTL',Tab:'TAB',Escape:'ESC',Backspace:'BKS',
+      ArrowUp:'\u2191',ArrowDown:'\u2193',ArrowLeft:'\u2190',ArrowRight:'\u2192'
     };
     if (map[code]) return map[code];
     return code.replace('Key','').replace('Digit','');
@@ -110,27 +174,31 @@
     if (type === 'keydown') pressedKeys[code] = true;
     if (type === 'keyup') delete pressedKeys[code];
     var info = KEY_DB[code];
-    var evt = new KeyboardEvent(type, {
+    var props = {
       key: info.key,
       code: info.code,
       keyCode: info.keyCode,
       which: info.keyCode,
       bubbles: true,
       cancelable: true
-    });
+    };
+    var evt = new KeyboardEvent(type, props);
     document.dispatchEvent(evt);
     if (document.activeElement && document.activeElement !== document.body) {
-      try { document.activeElement.dispatchEvent(new KeyboardEvent(type, {
-        key: info.key, code: info.code, keyCode: info.keyCode,
-        which: info.keyCode, bubbles: true, cancelable: true
-      })); } catch(e) {}
+      try { document.activeElement.dispatchEvent(new KeyboardEvent(type, props)); } catch(e) {}
     }
     var canvas = document.querySelector('canvas');
     if (canvas) {
-      try { canvas.dispatchEvent(new KeyboardEvent(type, {
-        key: info.key, code: info.code, keyCode: info.keyCode,
-        which: info.keyCode, bubbles: true, cancelable: true
-      })); } catch(e) {}
+      try { canvas.dispatchEvent(new KeyboardEvent(type, props)); } catch(e) {}
+    }
+    var iframes = document.querySelectorAll('iframe');
+    for (var i = 0; i < iframes.length; i++) {
+      try {
+        var iframeDoc = iframes[i].contentDocument || iframes[i].contentWindow.document;
+        iframeDoc.dispatchEvent(new KeyboardEvent(type, props));
+        var iframeCanvas = iframeDoc.querySelector('canvas');
+        if (iframeCanvas) iframeCanvas.dispatchEvent(new KeyboardEvent(type, props));
+      } catch(e) {}
     }
     if (window.MobileGamepad && window.MobileGamepad.emit) {
       window.MobileGamepad.emit(type, { code: code, key: info.key });
@@ -148,7 +216,6 @@
 
   function clamp(val, min, max) { return Math.max(min, Math.min(max, val)); }
   function dist(x1, y1, x2, y2) { return Math.sqrt((x2-x1)*(x2-x1)+(y2-y1)*(y2-y1)); }
-  function angle(cx, cy, x, y) { return Math.atan2(-(y - cy), x - cx); }
 
   function el(tag, cls, parent) {
     var e = document.createElement(tag);
@@ -157,11 +224,10 @@
     return e;
   }
 
-
   var CSS = [
-    '.mgp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:99990;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}',
-    '.mgp-ctrl{pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none}',
-    '.mgp-joystick-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s}',
+    '.mgp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483640;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}',
+    '.mgp-ctrl{pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;position:relative;z-index:2147483641}',
+    '.mgp-joystick-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483642}',
     '.mgp-joystick-base{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,0.12),rgba(255,255,255,0.04));border:1.5px solid rgba(255,255,255,0.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);position:relative;box-shadow:0 2px 16px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform 0.15s,box-shadow 0.15s}',
     '.mgp-joystick-base.mgp-active{box-shadow:0 2px 24px rgba(100,180,255,0.15),inset 0 1px 0 rgba(255,255,255,0.12);border-color:rgba(100,180,255,0.3)}',
     '.mgp-joystick-knob{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,0.28),rgba(255,255,255,0.1));border:1.5px solid rgba(255,255,255,0.25);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(0,0,0,0.25);transition:box-shadow 0.1s;will-change:left,top}',
@@ -174,7 +240,7 @@
     '.mgp-joystick-dir.mgp-dir-right{right:8px;top:50%;margin-top:-4px}',
     '.mgp-float-base{position:absolute;pointer-events:none;opacity:0;transition:opacity 0.12s}',
     '.mgp-float-base.mgp-visible{opacity:1}',
-    '.mgp-dpad-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s}',
+    '.mgp-dpad-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483642}',
     '.mgp-dpad{width:130px;height:130px;position:relative}',
     '.mgp-dpad-btn{position:absolute;width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;transition:background 0.1s,border-color 0.1s,transform 0.08s;box-shadow:0 1px 8px rgba(0,0,0,0.15)}',
     '.mgp-dpad-btn.mgp-pressed{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.4);transform:scale(0.92)}',
@@ -185,22 +251,22 @@
     '.mgp-dpad-left{left:0;top:50%;margin-top:-21px}',
     '.mgp-dpad-right{right:0;top:50%;margin-top:-21px}',
     '.mgp-dpad-center{position:absolute;top:50%;left:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}',
-    '.mgp-actions{position:absolute;bottom:16px;right:16px;width:120px;height:120px;transition:opacity 0.2s}',
+    '.mgp-actions{position:absolute;bottom:16px;right:16px;width:120px;height:120px;transition:opacity 0.2s;z-index:2147483642}',
     '.mgp-action-btn{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:rgba(255,255,255,0.55);letter-spacing:0.5px;transition:background 0.1s,border-color 0.1s,transform 0.08s,color 0.1s;box-shadow:0 1px 8px rgba(0,0,0,0.15);text-transform:uppercase}',
     '.mgp-action-btn.mgp-pressed{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.4);color:rgba(100,180,255,0.9);transform:scale(0.9)}',
     '.mgp-action-a{bottom:0;left:50%;margin-left:-22px}',
     '.mgp-action-b{right:0;top:50%;margin-top:-22px}',
     '.mgp-action-x{left:0;top:50%;margin-top:-22px}',
     '.mgp-action-y{top:0;left:50%;margin-left:-22px}',
-    '.mgp-switch-btn{position:absolute;bottom:150px;left:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s}',
+    '.mgp-switch-btn{position:absolute;bottom:150px;left:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s;z-index:2147483642}',
     '.mgp-switch-btn:active{background:rgba(100,180,255,0.15);border-color:rgba(100,180,255,0.3)}',
     '.mgp-switch-btn svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}',
-    '.mgp-gear{position:absolute;bottom:148px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.2s,transform 0.3s,border-color 0.2s}',
+    '.mgp-gear{position:absolute;bottom:148px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.2s,transform 0.3s,border-color 0.2s;z-index:2147483642}',
     '.mgp-gear.mgp-open{background:rgba(100,180,255,0.12);border-color:rgba(100,180,255,0.3);transform:rotate(45deg)}',
     '.mgp-gear svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
-    '.mgp-panel-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:99991}',
+    '.mgp-panel-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:2147483645}',
     '.mgp-panel-backdrop.mgp-visible{opacity:1;pointer-events:auto}',
-    '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:rgba(20,22,28,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:99992;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,24px) 0;touch-action:pan-y}',
+    '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:rgba(20,22,28,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:2147483646;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,24px) 0;touch-action:pan-y}',
     '.mgp-panel.mgp-visible{transform:translateY(0)}',
     '.mgp-panel-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);margin:10px auto 0}',
     '.mgp-panel-title{font-size:17px;font-weight:700;color:rgba(255,255,255,0.9);padding:18px 20px 10px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:-0.2px}',
@@ -214,7 +280,7 @@
     '.mgp-toggle-thumb{position:absolute;top:3px;left:3px;width:26px;height:26px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,0.25);transition:left 0.2s}',
     '.mgp-toggle.mgp-on .mgp-toggle-thumb{left:25px}',
     '.mgp-seg{display:flex;background:rgba(255,255,255,0.06);border-radius:10px;overflow:hidden;border:1px solid rgba(255,255,255,0.08);width:100%}',
-    '.mgp-seg-btn{flex:1;padding:14px 16px;font-size:15px;font-weight:600;color:rgba(255,255,255,0.45);text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:transparent;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;letter-spacing:0.3px;touch-action:manipulation;min-height:48px;-webkit-tap-highlight-color:rgba(100,180,255,0.15)}',
+    '.mgp-seg-btn{flex:1;padding:14px 10px;font-size:13px;font-weight:600;color:rgba(255,255,255,0.45);text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;background:transparent;border:none;cursor:pointer;transition:background 0.15s,color 0.15s;letter-spacing:0.3px;touch-action:manipulation;min-height:48px;-webkit-tap-highlight-color:rgba(100,180,255,0.15)}',
     '.mgp-seg-btn.mgp-active{background:rgba(52,120,246,0.75);color:rgba(255,255,255,0.95)}',
     '.mgp-slider-wrap{display:flex;align-items:center;gap:10px;flex:1;max-width:160px}',
     '.mgp-slider{-webkit-appearance:none;appearance:none;width:100%;height:6px;border-radius:2px;background:rgba(255,255,255,0.12);outline:none}',
@@ -223,11 +289,12 @@
     '.mgp-bind-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid rgba(255,255,255,0.05)}',
     '.mgp-bind-row:last-child{border-bottom:none}',
     '.mgp-bind-label{font-size:14px;color:rgba(255,255,255,0.5);width:28px;font-weight:700;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}',
+    '.mgp-bind-label.mgp-bind-label-wide{width:50px}',
     '.mgp-bind-btn{flex:1;padding:12px 14px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:14px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s,border-color 0.15s;touch-action:manipulation;-webkit-tap-highlight-color:rgba(100,180,255,0.15)}',
     '.mgp-bind-btn:active{background:rgba(52,120,246,0.15);border-color:rgba(52,120,246,0.3)}',
-    '.mgp-cursor-dot{position:fixed;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.08);pointer-events:none;z-index:99989;transition:opacity 0.15s;box-shadow:0 0 8px rgba(0,0,0,0.3)}',
+    '.mgp-cursor-dot{position:fixed;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.08);pointer-events:none;z-index:2147483639;transition:opacity 0.15s;box-shadow:0 0 8px rgba(0,0,0,0.3)}',
     '.mgp-cursor-dot.mgp-dragging{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.7)}',
-    '.mgp-kbd-btn{position:absolute;bottom:70px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s}',
+    '.mgp-kbd-btn{position:absolute;bottom:70px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s;z-index:2147483642}',
     '.mgp-kbd-btn:active{background:rgba(100,180,255,0.15);border-color:rgba(100,180,255,0.3)}',
     '.mgp-kbd-btn svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
     '.mgp-hidden-input{position:fixed;top:-100px;left:-100px;opacity:0;width:1px;height:1px;border:none;outline:none;pointer-events:none}',
@@ -238,16 +305,18 @@
     '@media(orientation:landscape){.mgp-joystick-zone{bottom:8px;left:8px}.mgp-dpad-zone{bottom:8px;left:8px}.mgp-actions{bottom:12px;right:12px}}',
     '.mgp-reset-btn{display:block;width:100%;padding:16px;min-height:48px;margin-top:8px;border-radius:10px;background:rgba(255,60,60,0.12);border:1px solid rgba(255,60,60,0.2);color:rgba(255,100,100,0.85);font-size:13px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s;touch-action:manipulation}',
     '.mgp-reset-btn:active{background:rgba(255,60,60,0.25)}',
-    '.mgp-divider{height:1px;background:rgba(255,255,255,0.06);margin:8px 0}'
+    '.mgp-divider{height:1px;background:rgba(255,255,255,0.06);margin:8px 0}',
+    '.mgp-scheme-hint{font-size:11px;color:rgba(255,255,255,0.3);padding:4px 0 0;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif}'
   ].join('\n');
 
   function injectCSS() {
+    var existing = document.getElementById('mgp-styles');
+    if (existing) existing.parentNode.removeChild(existing);
     var s = document.createElement('style');
     s.id = 'mgp-styles';
     s.textContent = CSS;
     document.head.appendChild(s);
   }
-
 
   var ICONS = {
     gear: '<svg viewBox="0 0 24 24"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>',
@@ -296,7 +365,7 @@
 
   Joystick.prototype.buildFloat = function() {
     this.floatZone = el('div', 'mgp-ctrl', this.overlay);
-    this.floatZone.style.cssText = 'position:absolute;top:0;left:0;width:50%;height:100%;pointer-events:auto;touch-action:none;display:none;z-index:1';
+    this.floatZone.style.cssText = 'position:absolute;top:0;left:0;width:50%;height:100%;pointer-events:auto;touch-action:none;display:none;z-index:2147483642';
     this.floatBase = el('div', 'mgp-joystick-base mgp-float-base', this.floatZone);
     var dirs = ['up','down','left','right'];
     for (var i = 0; i < dirs.length; i++) {
@@ -348,7 +417,7 @@
       self.knob.classList.add('mgp-active');
       self.handleMove(t.clientX, t.clientY);
       haptic(8);
-    }, { passive: false });
+    }, { passive: false, capture: true });
 
     this.floatZone.addEventListener('touchstart', function(e) {
       if (state.joystickType !== 'floating' || state.inputMode !== 'joystick') return;
@@ -374,7 +443,7 @@
       self.active = true;
       self.handleMove(t.clientX, t.clientY);
       haptic(8);
-    }, { passive: false });
+    }, { passive: false, capture: true });
 
     document.addEventListener('touchmove', function(e) {
       if (!self.active || self.touchId === null) return;
@@ -426,6 +495,7 @@
 
     var norm = d / maxR;
     var newDirs = { up: false, down: false, left: false, right: false };
+    var moveKeys = getMovementKeys();
 
     if (norm > this.deadzone) {
       if (state.directionMode === '8way') {
@@ -458,17 +528,17 @@
     }
 
     var changed = false;
-    var dirKeys = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+    var dirKeyMap = { up: moveKeys.up, down: moveKeys.down, left: moveKeys.left, right: moveKeys.right };
     var dots = this.getActiveDots();
 
     for (var dir in newDirs) {
       if (newDirs[dir] !== this.dirs[dir]) {
         changed = true;
         if (newDirs[dir]) {
-          fireKey(dirKeys[dir], 'keydown');
+          fireKey(dirKeyMap[dir], 'keydown');
           if (dots[dir]) dots[dir].classList.add('mgp-lit');
         } else {
-          fireKey(dirKeys[dir], 'keyup');
+          fireKey(dirKeyMap[dir], 'keyup');
           if (dots[dir]) dots[dir].classList.remove('mgp-lit');
         }
       }
@@ -483,11 +553,12 @@
     this.active = false;
     this.touchId = null;
 
-    var dirKeys = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
+    var moveKeys = getMovementKeys();
+    var dirKeyMap = { up: moveKeys.up, down: moveKeys.down, left: moveKeys.left, right: moveKeys.right };
     var dots = this.getActiveDots();
     for (var dir in this.dirs) {
       if (this.dirs[dir]) {
-        fireKey(dirKeys[dir], 'keyup');
+        fireKey(dirKeyMap[dir], 'keyup');
         if (dots[dir]) dots[dir].classList.remove('mgp-lit');
       }
     }
@@ -554,11 +625,12 @@
 
   DPad.prototype.bindEvents = function() {
     var self = this;
-    var dirKeys = { up: 'ArrowUp', down: 'ArrowDown', left: 'ArrowLeft', right: 'ArrowRight' };
 
     this.zone.addEventListener('touchstart', function(e) {
       e.preventDefault();
       e.stopPropagation();
+      var moveKeys = getMovementKeys();
+      var dirKeyMap = { up: moveKeys.up, down: moveKeys.down, left: moveKeys.left, right: moveKeys.right };
       for (var i = 0; i < e.changedTouches.length; i++) {
         var t = e.changedTouches[i];
         var target = document.elementFromPoint(t.clientX, t.clientY);
@@ -569,14 +641,16 @@
           if (!self.pressed[dir]) {
             self.pressed[dir] = true;
             btn.classList.add('mgp-pressed');
-            fireKey(dirKeys[dir], 'keydown');
+            fireKey(dirKeyMap[dir], 'keydown');
             haptic(8);
           }
         }
       }
-    }, { passive: false });
+    }, { passive: false, capture: true });
 
     document.addEventListener('touchmove', function(e) {
+      var moveKeys = getMovementKeys();
+      var dirKeyMap = { up: moveKeys.up, down: moveKeys.down, left: moveKeys.left, right: moveKeys.right };
       for (var i = 0; i < e.changedTouches.length; i++) {
         var t = e.changedTouches[i];
         if (self.touchMap[t.identifier] !== undefined) {
@@ -588,12 +662,12 @@
             if (oldDir && self.pressed[oldDir]) {
               self.pressed[oldDir] = false;
               self.buttons[oldDir].classList.remove('mgp-pressed');
-              fireKey(dirKeys[oldDir], 'keyup');
+              fireKey(dirKeyMap[oldDir], 'keyup');
             }
             if (newDir && !self.pressed[newDir]) {
               self.pressed[newDir] = true;
               self.buttons[newDir].classList.add('mgp-pressed');
-              fireKey(dirKeys[newDir], 'keydown');
+              fireKey(dirKeyMap[newDir], 'keydown');
               haptic(6);
             }
             self.touchMap[t.identifier] = newDir;
@@ -603,6 +677,8 @@
     }, { passive: false });
 
     var endHandler = function(e) {
+      var moveKeys = getMovementKeys();
+      var dirKeyMap = { up: moveKeys.up, down: moveKeys.down, left: moveKeys.left, right: moveKeys.right };
       for (var i = 0; i < e.changedTouches.length; i++) {
         var t = e.changedTouches[i];
         var dir = self.touchMap[t.identifier];
@@ -618,7 +694,7 @@
             if (!stillHeld) {
               self.pressed[dir] = false;
               self.buttons[dir].classList.remove('mgp-pressed');
-              fireKey(dirKeys[dir], 'keyup');
+              fireKey(dirKeyMap[dir], 'keyup');
             }
           }
           delete self.touchMap[t.identifier];
@@ -709,7 +785,7 @@
           }
         }
       }
-    }, { passive: false });
+    }, { passive: false, capture: true });
 
     document.addEventListener('touchmove', function(e) {
       for (var i = 0; i < e.changedTouches.length; i++) {
@@ -967,6 +1043,7 @@
     this.panel = null;
     this.open = false;
     this.els = {};
+    this.resetConfirm = false;
     this.build();
     this.bindGear();
   }
@@ -981,11 +1058,12 @@
     this.panel = el('div', 'mgp-panel');
     document.body.appendChild(this.panel);
 
-    var handle = el('div', 'mgp-panel-handle', this.panel);
+    el('div', 'mgp-panel-handle', this.panel);
     var title = el('div', 'mgp-panel-title', this.panel);
     title.textContent = 'Gamepad Settings';
 
     this.buildInputSection();
+    this.buildMovementSection();
     this.buildJoystickSection();
     this.buildActionSection();
     this.buildAdvancedSection();
@@ -1022,6 +1100,61 @@
       self.syncUI();
       self.emitChange();
     });
+  };
+
+  SettingsPanel.prototype.buildMovementSection = function() {
+    var section = el('div', 'mgp-section', this.panel);
+    this.els.movementSection = section;
+
+    var label = el('div', 'mgp-section-label', section);
+    label.textContent = 'MOVEMENT KEYS';
+
+    var row1 = el('div', 'mgp-row', section);
+    var seg = el('div', 'mgp-seg', row1);
+
+    var schemeKeys = Object.keys(MOVEMENT_SCHEMES);
+    var self = this;
+    this.els.schemeButtons = {};
+
+    for (var i = 0; i < schemeKeys.length; i++) {
+      (function(key) {
+        var btn = el('button', 'mgp-seg-btn', seg);
+        btn.textContent = MOVEMENT_SCHEMES[key].label;
+        self.els.schemeButtons[key] = btn;
+        btn.addEventListener('click', function() {
+          state.movementScheme = key;
+          self.syncUI();
+          self.emitChange();
+        });
+      })(schemeKeys[i]);
+    }
+
+    var hintRow = el('div', '', section);
+    this.els.schemeHint = el('div', 'mgp-scheme-hint', hintRow);
+
+    this.els.customBindContainer = el('div', '', section);
+    var customDirs = [
+      { id: 'customUp', label: 'Up', stateKey: 'customMoveUp' },
+      { id: 'customDown', label: 'Down', stateKey: 'customMoveDown' },
+      { id: 'customLeft', label: 'Left', stateKey: 'customMoveLeft' },
+      { id: 'customRight', label: 'Right', stateKey: 'customMoveRight' }
+    ];
+
+    for (var ci = 0; ci < customDirs.length; ci++) {
+      (function(bind) {
+        var row = el('div', 'mgp-bind-row', self.els.customBindContainer);
+        var lbl = el('div', 'mgp-bind-label mgp-bind-label-wide', row);
+        lbl.textContent = bind.label;
+        var btn = el('div', 'mgp-bind-btn', row);
+        btn.textContent = keyLabel(state[bind.stateKey]);
+        btn.dataset.stateKey = bind.stateKey;
+        self.els['bind_' + bind.id] = btn;
+
+        btn.addEventListener('click', function() {
+          self.cycleBinding(bind.stateKey, btn);
+        });
+      })(customDirs[ci]);
+    }
   };
 
   SettingsPanel.prototype.buildJoystickSection = function() {
@@ -1233,7 +1366,7 @@
 
   SettingsPanel.prototype.buildVersion = function() {
     var section = el('div', 'mgp-section', this.panel);
-    var divider = el('div', 'mgp-divider', section);
+    el('div', 'mgp-divider', section);
 
     var resetBtn = el('button', 'mgp-reset-btn', section);
     resetBtn.textContent = 'Reset to Defaults';
@@ -1287,6 +1420,38 @@
 
     this.els.seg4way.classList.toggle('mgp-active', state.directionMode === '4way');
     this.els.seg8way.classList.toggle('mgp-active', state.directionMode === '8way');
+
+    var schemeKeys = Object.keys(MOVEMENT_SCHEMES);
+    for (var si = 0; si < schemeKeys.length; si++) {
+      var sk = schemeKeys[si];
+      if (this.els.schemeButtons[sk]) {
+        this.els.schemeButtons[sk].classList.toggle('mgp-active', state.movementScheme === sk);
+      }
+    }
+
+    var isCustom = state.movementScheme === 'custom';
+    this.els.customBindContainer.style.display = isCustom ? '' : 'none';
+
+    if (!isCustom) {
+      var scheme = MOVEMENT_SCHEMES[state.movementScheme] || MOVEMENT_SCHEMES.arrows;
+      this.els.schemeHint.textContent = '\u2191 ' + keyLabel(scheme.up) + '  \u2193 ' + keyLabel(scheme.down) + '  \u2190 ' + keyLabel(scheme.left) + '  \u2192 ' + keyLabel(scheme.right);
+      this.els.schemeHint.style.display = '';
+    } else {
+      this.els.schemeHint.style.display = 'none';
+    }
+
+    if (isCustom) {
+      var customBinds = [
+        { id: 'customUp', stateKey: 'customMoveUp' },
+        { id: 'customDown', stateKey: 'customMoveDown' },
+        { id: 'customLeft', stateKey: 'customMoveLeft' },
+        { id: 'customRight', stateKey: 'customMoveRight' }
+      ];
+      for (var cb = 0; cb < customBinds.length; cb++) {
+        var bindEl = this.els['bind_' + customBinds[cb].id];
+        if (bindEl) bindEl.textContent = keyLabel(state[customBinds[cb].stateKey]);
+      }
+    }
 
     this.updateToggle(this.els.toggleActions, state.actionButtons);
     this.els.bindContainer.style.display = state.actionButtons ? '' : 'none';
@@ -1424,6 +1589,48 @@
     this.applyState();
     this.bindGlobalEvents();
     this.preventGhostInputs();
+    this.installTouchIntercept();
+  };
+
+  MobileGamepad.prototype.installTouchIntercept = function() {
+    var self = this;
+    var controlSelectors = '.mgp-joystick-zone,.mgp-joystick-base,.mgp-joystick-knob,.mgp-dpad-zone,.mgp-dpad-btn,.mgp-actions,.mgp-action-btn,.mgp-gear,.mgp-switch-btn,.mgp-kbd-btn,.mgp-panel,.mgp-panel-backdrop,.mgp-toggle,.mgp-seg-btn,.mgp-bind-btn,.mgp-slider,.mgp-reset-btn,.mgp-ctrl';
+
+    document.addEventListener('touchstart', function(e) {
+      if (!state.showControls) return;
+      var touch = e.touches[0];
+      if (!touch) return;
+      var target = document.elementFromPoint(touch.clientX, touch.clientY);
+      if (!target) return;
+      var matchesControl = target.matches(controlSelectors) || target.closest(controlSelectors);
+      if (matchesControl) {
+        e.stopImmediatePropagation();
+      }
+    }, { capture: true, passive: false });
+
+    document.addEventListener('touchmove', function(e) {
+      if (!state.showControls) return;
+      for (var i = 0; i < e.touches.length; i++) {
+        var touch = e.touches[i];
+        var target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (target && (target.matches(controlSelectors) || target.closest(controlSelectors))) {
+          e.stopImmediatePropagation();
+          return;
+        }
+      }
+    }, { capture: true, passive: false });
+
+    document.addEventListener('touchend', function(e) {
+      if (!state.showControls) return;
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        var touch = e.changedTouches[i];
+        var target = document.elementFromPoint(touch.clientX, touch.clientY);
+        if (target && (target.matches(controlSelectors) || target.closest(controlSelectors))) {
+          e.stopImmediatePropagation();
+          return;
+        }
+      }
+    }, { capture: true, passive: false });
   };
 
   MobileGamepad.prototype.buildSwitchButton = function() {
@@ -1508,24 +1715,9 @@
   };
 
   MobileGamepad.prototype.preventGhostInputs = function() {
-    var controlSelectors = [
-      '.mgp-joystick-zone', '.mgp-dpad-zone', '.mgp-actions',
-      '.mgp-gear', '.mgp-switch-btn', '.mgp-kbd-btn',
-      '.mgp-panel', '.mgp-panel-backdrop'
-    ];
-
     this.overlay.addEventListener('contextmenu', function(e) {
       e.preventDefault();
     });
-
-    document.addEventListener('touchstart', function(e) {
-      var target = e.target;
-      for (var i = 0; i < controlSelectors.length; i++) {
-        if (target.closest(controlSelectors[i])) {
-          return;
-        }
-      }
-    }, { passive: true });
   };
 
   MobileGamepad.prototype.show = function() {
@@ -1621,6 +1813,21 @@
   MobileGamepad.prototype.isMobile = function() { return true; };
 
   MobileGamepad.prototype.getVersion = function() { return VERSION; };
+
+  MobileGamepad.prototype.getMovementScheme = function() { return state.movementScheme; };
+
+  MobileGamepad.prototype.setMovementScheme = function(scheme) {
+    if (MOVEMENT_SCHEMES[scheme]) {
+      state.movementScheme = scheme;
+      saveState();
+      this.applyState();
+      if (this.settings.open) this.settings.syncUI();
+    }
+  };
+
+  MobileGamepad.prototype.getAvailableSchemes = function() {
+    return Object.keys(MOVEMENT_SCHEMES);
+  };
 
   MobileGamepad.prototype.destroy = function() {
     releaseAllKeys();
