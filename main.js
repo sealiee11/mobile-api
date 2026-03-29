@@ -77,8 +77,8 @@
     doubleTapDrag: false,
     virtualKeyboard: false,
     hapticFeedback: true,
-    opacity: 0.85,
-    controlSize: 1.1,
+    opacity: 0.45,
+    controlSize: 1.0,
     showControls: true
   };
 
@@ -225,7 +225,7 @@
   }
 
   var CSS = [
-    '.mgp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483645;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}',
+    '.mgp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483647;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}',
     '.mgp-ctrl{pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;position:relative;z-index:2147483646}',
     '.mgp-joystick-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483647}',
     '.mgp-joystick-base{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,0.12),rgba(255,255,255,0.04));border:1.5px solid rgba(255,255,255,0.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);position:relative;box-shadow:0 2px 16px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform 0.15s,box-shadow 0.15s}',
@@ -264,7 +264,7 @@
     '.mgp-gear{position:absolute;bottom:148px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.2s,transform 0.3s,border-color 0.2s;z-index:2147483647}',
     '.mgp-gear.mgp-open{background:rgba(100,180,255,0.12);border-color:rgba(100,180,255,0.3);transform:rotate(45deg)}',
     '.mgp-gear svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
-    '.mgp-panel-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:2147483645}',
+    '.mgp-panel-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:2147483647}',
     '.mgp-panel-backdrop.mgp-visible{opacity:1;pointer-events:auto}',
     '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:rgba(20,22,28,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:2147483647;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,24px) 0;touch-action:pan-y}',
     '.mgp-panel.mgp-visible{transform:translateY(0)}',
@@ -1593,97 +1593,6 @@
   };
 
   MobileGamepad.prototype.installTouchIntercept = function() {
-    var self = this;
-    var trackedControlTouches = {};
-
-    window.addEventListener('touchstart', function(e) {
-      if (!state.showControls) return;
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        var t = e.changedTouches[i];
-        var target = document.elementFromPoint(t.clientX, t.clientY);
-        if (target && self.isOurElement(target)) {
-          trackedControlTouches[t.identifier] = true;
-        }
-      }
-    }, { capture: true, passive: true });
-
-    var gameHandlerBlocker = function(e) {
-      if (!state.showControls) return;
-      var dominated = false;
-      var touches = e.type === 'touchstart' ? e.changedTouches : e.changedTouches;
-      for (var i = 0; i < touches.length; i++) {
-        if (trackedControlTouches[touches[i].identifier]) {
-          dominated = true;
-          break;
-        }
-      }
-      if (dominated) {
-        e.stopPropagation();
-      }
-    };
-
-    document.addEventListener('touchstart', gameHandlerBlocker, { capture: false, passive: true });
-    document.addEventListener('touchmove', gameHandlerBlocker, { capture: false, passive: true });
-    document.addEventListener('touchend', gameHandlerBlocker, { capture: false, passive: true });
-
-    var cleanupHandler = function(e) {
-      for (var i = 0; i < e.changedTouches.length; i++) {
-        delete trackedControlTouches[e.changedTouches[i].identifier];
-      }
-    };
-    window.addEventListener('touchend', cleanupHandler, { capture: true, passive: true });
-    window.addEventListener('touchcancel', cleanupHandler, { capture: true, passive: true });
-
-    this.patchGameCanvasTouches();
-  };
-
-  MobileGamepad.prototype.isOurElement = function(target) {
-    if (!target) return false;
-    if (!target.closest) return false;
-    return !!(
-      target.closest('.mgp-overlay') ||
-      target.closest('.mgp-panel') ||
-      target.closest('.mgp-panel-backdrop')
-    );
-  };
-
-  MobileGamepad.prototype.patchGameCanvasTouches = function() {
-    var self = this;
-    var origAddEventListener = EventTarget.prototype.addEventListener;
-    var patchedTargets = new WeakSet();
-
-    function wrapHandler(handler) {
-      return function(e) {
-        if (e.type && e.type.indexOf('touch') === 0) {
-          if (!state.showControls) return handler.call(this, e);
-          var allOurs = true;
-          var touchList = e.touches || e.changedTouches;
-          if (touchList) {
-            for (var i = 0; i < touchList.length; i++) {
-              var target = document.elementFromPoint(touchList[i].clientX, touchList[i].clientY);
-              if (target && self.isOurElement(target)) {
-                continue;
-              }
-              allOurs = false;
-              break;
-            }
-          }
-          if (allOurs && touchList && touchList.length > 0) return;
-        }
-        return handler.call(this, e);
-      };
-    }
-
-    EventTarget.prototype.addEventListener = function(type, handler, options) {
-      if (type === 'touchstart' || type === 'touchmove' || type === 'touchend' || type === 'touchcancel') {
-        if (this !== window && this !== document && !self.isOurElement(this)) {
-          var wrapped = wrapHandler(handler);
-          wrapped._mgpOriginal = handler;
-          return origAddEventListener.call(this, type, wrapped, options);
-        }
-      }
-      return origAddEventListener.call(this, type, handler, options);
-    };
   };
 
   MobileGamepad.prototype.buildSwitchButton = function() {
