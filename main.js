@@ -77,8 +77,8 @@
     doubleTapDrag: false,
     virtualKeyboard: false,
     hapticFeedback: true,
-    opacity: 0.45,
-    controlSize: 1.0,
+    opacity: 0.85,
+    controlSize: 1.1,
     showControls: true
   };
 
@@ -225,9 +225,9 @@
   }
 
   var CSS = [
-    '.mgp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483640;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}',
-    '.mgp-ctrl{pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;position:relative;z-index:2147483641}',
-    '.mgp-joystick-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483642}',
+    '.mgp-overlay{position:fixed;top:0;left:0;width:100%;height:100%;pointer-events:none;z-index:2147483645;user-select:none;-webkit-user-select:none;-webkit-touch-callout:none;overflow:hidden}',
+    '.mgp-ctrl{pointer-events:auto;touch-action:none;-webkit-tap-highlight-color:transparent;-webkit-touch-callout:none;user-select:none;-webkit-user-select:none;position:relative;z-index:2147483646}',
+    '.mgp-joystick-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483647}',
     '.mgp-joystick-base{width:130px;height:130px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,0.12),rgba(255,255,255,0.04));border:1.5px solid rgba(255,255,255,0.18);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);position:relative;box-shadow:0 2px 16px rgba(0,0,0,0.18),inset 0 1px 0 rgba(255,255,255,0.08);transition:transform 0.15s,box-shadow 0.15s}',
     '.mgp-joystick-base.mgp-active{box-shadow:0 2px 24px rgba(100,180,255,0.15),inset 0 1px 0 rgba(255,255,255,0.12);border-color:rgba(100,180,255,0.3)}',
     '.mgp-joystick-knob{width:52px;height:52px;border-radius:50%;background:radial-gradient(circle at 40% 35%,rgba(255,255,255,0.28),rgba(255,255,255,0.1));border:1.5px solid rgba(255,255,255,0.25);position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);box-shadow:0 2px 10px rgba(0,0,0,0.25);transition:box-shadow 0.1s;will-change:left,top}',
@@ -240,7 +240,7 @@
     '.mgp-joystick-dir.mgp-dir-right{right:8px;top:50%;margin-top:-4px}',
     '.mgp-float-base{position:absolute;pointer-events:none;opacity:0;transition:opacity 0.12s}',
     '.mgp-float-base.mgp-visible{opacity:1}',
-    '.mgp-dpad-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483642}',
+    '.mgp-dpad-zone{position:absolute;bottom:12px;left:12px;transition:opacity 0.2s;z-index:2147483647}',
     '.mgp-dpad{width:130px;height:130px;position:relative}',
     '.mgp-dpad-btn{position:absolute;width:42px;height:42px;border-radius:10px;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;transition:background 0.1s,border-color 0.1s,transform 0.08s;box-shadow:0 1px 8px rgba(0,0,0,0.15)}',
     '.mgp-dpad-btn.mgp-pressed{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.4);transform:scale(0.92)}',
@@ -251,22 +251,22 @@
     '.mgp-dpad-left{left:0;top:50%;margin-top:-21px}',
     '.mgp-dpad-right{right:0;top:50%;margin-top:-21px}',
     '.mgp-dpad-center{position:absolute;top:50%;left:50%;width:22px;height:22px;margin:-11px 0 0 -11px;border-radius:50%;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.08)}',
-    '.mgp-actions{position:absolute;bottom:16px;right:16px;width:120px;height:120px;transition:opacity 0.2s;z-index:2147483642}',
+    '.mgp-actions{position:absolute;bottom:16px;right:16px;width:120px;height:120px;transition:opacity 0.2s;z-index:2147483647}',
     '.mgp-action-btn{position:absolute;width:44px;height:44px;border-radius:50%;background:rgba(255,255,255,0.08);border:1.5px solid rgba(255,255,255,0.15);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:600;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;color:rgba(255,255,255,0.55);letter-spacing:0.5px;transition:background 0.1s,border-color 0.1s,transform 0.08s,color 0.1s;box-shadow:0 1px 8px rgba(0,0,0,0.15);text-transform:uppercase}',
     '.mgp-action-btn.mgp-pressed{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.4);color:rgba(100,180,255,0.9);transform:scale(0.9)}',
     '.mgp-action-a{bottom:0;left:50%;margin-left:-22px}',
     '.mgp-action-b{right:0;top:50%;margin-top:-22px}',
     '.mgp-action-x{left:0;top:50%;margin-top:-22px}',
     '.mgp-action-y{top:0;left:50%;margin-left:-22px}',
-    '.mgp-switch-btn{position:absolute;bottom:150px;left:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s;z-index:2147483642}',
+    '.mgp-switch-btn{position:absolute;bottom:150px;left:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s;z-index:2147483647}',
     '.mgp-switch-btn:active{background:rgba(100,180,255,0.15);border-color:rgba(100,180,255,0.3)}',
     '.mgp-switch-btn svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:2;stroke-linecap:round;stroke-linejoin:round}',
-    '.mgp-gear{position:absolute;bottom:148px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.2s,transform 0.3s,border-color 0.2s;z-index:2147483642}',
+    '.mgp-gear{position:absolute;bottom:148px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.2s,transform 0.3s,border-color 0.2s;z-index:2147483647}',
     '.mgp-gear.mgp-open{background:rgba(100,180,255,0.12);border-color:rgba(100,180,255,0.3);transform:rotate(45deg)}',
     '.mgp-gear svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
     '.mgp-panel-backdrop{position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.4);opacity:0;pointer-events:none;transition:opacity 0.25s;z-index:2147483645}',
     '.mgp-panel-backdrop.mgp-visible{opacity:1;pointer-events:auto}',
-    '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:rgba(20,22,28,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:2147483646;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,24px) 0;touch-action:pan-y}',
+    '.mgp-panel{position:fixed;bottom:0;left:0;right:0;max-height:85vh;background:rgba(20,22,28,0.97);backdrop-filter:blur(20px);-webkit-backdrop-filter:blur(20px);border-top:1px solid rgba(255,255,255,0.1);border-radius:20px 20px 0 0;transform:translateY(100%);transition:transform 0.3s cubic-bezier(0.32,0.72,0,1);z-index:2147483647;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 env(safe-area-inset-bottom,24px) 0;touch-action:pan-y}',
     '.mgp-panel.mgp-visible{transform:translateY(0)}',
     '.mgp-panel-handle{width:36px;height:4px;border-radius:2px;background:rgba(255,255,255,0.2);margin:10px auto 0}',
     '.mgp-panel-title{font-size:17px;font-weight:700;color:rgba(255,255,255,0.9);padding:18px 20px 10px;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;letter-spacing:-0.2px}',
@@ -292,9 +292,9 @@
     '.mgp-bind-label.mgp-bind-label-wide{width:50px}',
     '.mgp-bind-btn{flex:1;padding:12px 14px;min-height:44px;border-radius:10px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);color:rgba(255,255,255,0.6);font-size:14px;font-weight:600;text-align:center;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;cursor:pointer;transition:background 0.15s,border-color 0.15s;touch-action:manipulation;-webkit-tap-highlight-color:rgba(100,180,255,0.15)}',
     '.mgp-bind-btn:active{background:rgba(52,120,246,0.15);border-color:rgba(52,120,246,0.3)}',
-    '.mgp-cursor-dot{position:fixed;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.08);pointer-events:none;z-index:2147483639;transition:opacity 0.15s;box-shadow:0 0 8px rgba(0,0,0,0.3)}',
+    '.mgp-cursor-dot{position:fixed;width:20px;height:20px;margin:-10px 0 0 -10px;border-radius:50%;border:2px solid rgba(255,255,255,0.6);background:rgba(255,255,255,0.08);pointer-events:none;z-index:2147483644;transition:opacity 0.15s;box-shadow:0 0 8px rgba(0,0,0,0.3)}',
     '.mgp-cursor-dot.mgp-dragging{background:rgba(100,180,255,0.2);border-color:rgba(100,180,255,0.7)}',
-    '.mgp-kbd-btn{position:absolute;bottom:70px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s;z-index:2147483642}',
+    '.mgp-kbd-btn{position:absolute;bottom:70px;right:16px;width:36px;height:36px;border-radius:50%;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);backdrop-filter:blur(4px);-webkit-backdrop-filter:blur(4px);display:flex;align-items:center;justify-content:center;box-shadow:0 1px 6px rgba(0,0,0,0.12);transition:background 0.15s,border-color 0.15s;z-index:2147483647}',
     '.mgp-kbd-btn:active{background:rgba(100,180,255,0.15);border-color:rgba(100,180,255,0.3)}',
     '.mgp-kbd-btn svg{width:16px;height:16px;fill:none;stroke:rgba(255,255,255,0.45);stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}',
     '.mgp-hidden-input{position:fixed;top:-100px;left:-100px;opacity:0;width:1px;height:1px;border:none;outline:none;pointer-events:none}',
@@ -365,7 +365,7 @@
 
   Joystick.prototype.buildFloat = function() {
     this.floatZone = el('div', 'mgp-ctrl', this.overlay);
-    this.floatZone.style.cssText = 'position:absolute;top:0;left:0;width:50%;height:100%;pointer-events:auto;touch-action:none;display:none;z-index:2147483642';
+    this.floatZone.style.cssText = 'position:absolute;top:0;left:0;width:50%;height:100%;pointer-events:auto;touch-action:none;display:none;z-index:2147483647';
     this.floatBase = el('div', 'mgp-joystick-base mgp-float-base', this.floatZone);
     var dirs = ['up','down','left','right'];
     for (var i = 0; i < dirs.length; i++) {
@@ -1594,43 +1594,96 @@
 
   MobileGamepad.prototype.installTouchIntercept = function() {
     var self = this;
-    var controlSelectors = '.mgp-joystick-zone,.mgp-joystick-base,.mgp-joystick-knob,.mgp-dpad-zone,.mgp-dpad-btn,.mgp-actions,.mgp-action-btn,.mgp-gear,.mgp-switch-btn,.mgp-kbd-btn,.mgp-panel,.mgp-panel-backdrop,.mgp-toggle,.mgp-seg-btn,.mgp-bind-btn,.mgp-slider,.mgp-reset-btn,.mgp-ctrl';
+    var trackedControlTouches = {};
 
-    document.addEventListener('touchstart', function(e) {
-      if (!state.showControls) return;
-      var touch = e.touches[0];
-      if (!touch) return;
-      var target = document.elementFromPoint(touch.clientX, touch.clientY);
-      if (!target) return;
-      var matchesControl = target.matches(controlSelectors) || target.closest(controlSelectors);
-      if (matchesControl) {
-        e.stopImmediatePropagation();
-      }
-    }, { capture: true, passive: false });
-
-    document.addEventListener('touchmove', function(e) {
-      if (!state.showControls) return;
-      for (var i = 0; i < e.touches.length; i++) {
-        var touch = e.touches[i];
-        var target = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (target && (target.matches(controlSelectors) || target.closest(controlSelectors))) {
-          e.stopImmediatePropagation();
-          return;
-        }
-      }
-    }, { capture: true, passive: false });
-
-    document.addEventListener('touchend', function(e) {
+    window.addEventListener('touchstart', function(e) {
       if (!state.showControls) return;
       for (var i = 0; i < e.changedTouches.length; i++) {
-        var touch = e.changedTouches[i];
-        var target = document.elementFromPoint(touch.clientX, touch.clientY);
-        if (target && (target.matches(controlSelectors) || target.closest(controlSelectors))) {
-          e.stopImmediatePropagation();
-          return;
+        var t = e.changedTouches[i];
+        var target = document.elementFromPoint(t.clientX, t.clientY);
+        if (target && self.isOurElement(target)) {
+          trackedControlTouches[t.identifier] = true;
         }
       }
-    }, { capture: true, passive: false });
+    }, { capture: true, passive: true });
+
+    var gameHandlerBlocker = function(e) {
+      if (!state.showControls) return;
+      var dominated = false;
+      var touches = e.type === 'touchstart' ? e.changedTouches : e.changedTouches;
+      for (var i = 0; i < touches.length; i++) {
+        if (trackedControlTouches[touches[i].identifier]) {
+          dominated = true;
+          break;
+        }
+      }
+      if (dominated) {
+        e.stopPropagation();
+      }
+    };
+
+    document.addEventListener('touchstart', gameHandlerBlocker, { capture: false, passive: true });
+    document.addEventListener('touchmove', gameHandlerBlocker, { capture: false, passive: true });
+    document.addEventListener('touchend', gameHandlerBlocker, { capture: false, passive: true });
+
+    var cleanupHandler = function(e) {
+      for (var i = 0; i < e.changedTouches.length; i++) {
+        delete trackedControlTouches[e.changedTouches[i].identifier];
+      }
+    };
+    window.addEventListener('touchend', cleanupHandler, { capture: true, passive: true });
+    window.addEventListener('touchcancel', cleanupHandler, { capture: true, passive: true });
+
+    this.patchGameCanvasTouches();
+  };
+
+  MobileGamepad.prototype.isOurElement = function(target) {
+    if (!target) return false;
+    if (!target.closest) return false;
+    return !!(
+      target.closest('.mgp-overlay') ||
+      target.closest('.mgp-panel') ||
+      target.closest('.mgp-panel-backdrop')
+    );
+  };
+
+  MobileGamepad.prototype.patchGameCanvasTouches = function() {
+    var self = this;
+    var origAddEventListener = EventTarget.prototype.addEventListener;
+    var patchedTargets = new WeakSet();
+
+    function wrapHandler(handler) {
+      return function(e) {
+        if (e.type && e.type.indexOf('touch') === 0) {
+          if (!state.showControls) return handler.call(this, e);
+          var allOurs = true;
+          var touchList = e.touches || e.changedTouches;
+          if (touchList) {
+            for (var i = 0; i < touchList.length; i++) {
+              var target = document.elementFromPoint(touchList[i].clientX, touchList[i].clientY);
+              if (target && self.isOurElement(target)) {
+                continue;
+              }
+              allOurs = false;
+              break;
+            }
+          }
+          if (allOurs && touchList && touchList.length > 0) return;
+        }
+        return handler.call(this, e);
+      };
+    }
+
+    EventTarget.prototype.addEventListener = function(type, handler, options) {
+      if (type === 'touchstart' || type === 'touchmove' || type === 'touchend' || type === 'touchcancel') {
+        if (this !== window && this !== document && !self.isOurElement(this)) {
+          var wrapped = wrapHandler(handler);
+          wrapped._mgpOriginal = handler;
+          return origAddEventListener.call(this, type, wrapped, options);
+        }
+      }
+      return origAddEventListener.call(this, type, handler, options);
+    };
   };
 
   MobileGamepad.prototype.buildSwitchButton = function() {
